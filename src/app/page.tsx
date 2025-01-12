@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
 import factory from '../../factory';
-import CampaignList from '@/components/CampaignList';
 import { FaPlus } from 'react-icons/fa6';
+import { useEffect, useState } from 'react';
+import CampaignList from '@/components/CampaignList';
 
 export default function Home() {
   const [allCampaigns, setAllCampaigns] = useState<string[]>([]);
@@ -26,7 +26,17 @@ export default function Home() {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='card bg-base-100 shadow-xl my-5'>
+        <div className='card-body'>
+          <p className='card-title skeleton w-1/3 h-10'></p>
+          <p className='skeleton w-full h-10'></p>
+          <div className='card-actions justify-end'>
+            <button className='btn btn-outline btn-warning skeleton w-36'></button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

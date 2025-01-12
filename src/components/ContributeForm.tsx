@@ -1,36 +1,51 @@
-'use client';
-import React, {
+import {
+  FC,
   FormEventHandler,
+  RefObject,
   useContext,
   useEffect,
   useState,
 } from 'react';
-import { useRouter } from 'next/navigation';
-import factory from '../../factory';
-import web3 from '../../web3';
+import { Contract } from 'web3';
 import { ContextToast } from './ToastContext';
 import { fetchAccounts } from '../../campaign';
 
-const NewCampaignForm = () => {
-  const [minumumAmount, setMinumumAmount] = useState('');
+interface IContributeForm {
+  minimumAmount: number;
+  campaignRef: RefObject<Contract<any> | null>;
+  onSuccess: () => void;
+}
+
+const ContributeForm: FC<IContributeForm> = ({
+  minimumAmount,
+  campaignRef,
+  onSuccess,
+}) => {
+  const [amount, setAmount] = useState('');
+
   const [inputError, setInputError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const { setState } = useContext(ContextToast);
 
   useEffect(() => {
-    if (!minumumAmount || /^\d+$/.test(minumumAmount)) {
-      setInputError('');
+    if (!amount || /^\d+$/.test(amount)) {
+      if (amount && +amount < minimumAmount) {
+        setInputError(`Minimum amount of ${minimumAmount} Wei is required!`);
+      } else {
+        setInputError('');
+      }
     } else {
       setInputError('Only numbers are allowed.');
     }
-  }, [minumumAmount]);
+  }, [amount]);
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!minumumAmount.trim()) {
+    if (!amount.trim()) {
       setInputError('Minimum Amount is required.');
+    } else if (amount && +amount < minimumAmount) {
+      setInputError(`Minimum amount of ${minimumAmount} Wei is required!`);
     }
     if (!inputError) {
       setLoading(true);
@@ -38,20 +53,22 @@ const NewCampaignForm = () => {
       try {
         const accounts = await fetchAccounts();
         console.log('Accounts', accounts);
-        const res = await factory.methods.createCampaign(minumumAmount).send({
+        const res = await campaignRef.current!.methods.contribute().send({
           from: accounts[0],
+          value: amount,
         });
+
         console.log('RES', res);
         setLoading(false);
-        setMinumumAmount('');
+        setAmount('');
         setInputError('');
+        onSuccess();
         setState({
           show: true,
           type: 'success',
           title: 'Success',
-          message: 'Campaign Created successfully!',
+          message: 'Contributed to Campaign successfully!',
         });
-        router.push('/');
       } catch (err: any) {
         console.log('err', err);
         setLoading(false);
@@ -67,22 +84,28 @@ const NewCampaignForm = () => {
   };
 
   return (
-    <div>
-      <form className='my-5 flex flex-col items-start' onSubmit={onSubmit}>
+    <div className='lg:px-8'>
+      <form
+        className='my-5 lg:my-0 p-3.5 card bg-base-100 flex flex-col items-start'
+        onSubmit={onSubmit}
+      >
         <label className='form-control w-full max-w-xs'>
           <div className='label'>
-            <span className='label-text'>Minimum Contribution</span>
+            <span className='label-text'>Contribute to this campaign!</span>
           </div>
           <div className='relative'>
             <input
               type='text'
               placeholder='Type here'
-              className={`input z-10 pr-14 relative !bg-transparent input-bordered w-full max-w-xs ${
+              className={`input z-10 text-right pr-14 relative !bg-transparent input-bordered w-full max-w-xs ${
                 inputError ? 'input-error' : ''
               }`}
-              value={minumumAmount}
+              value={amount}
               onChange={(e) => {
-                setMinumumAmount(e.target.value);
+                const value = e.target.value;
+                if (value === '' || /^\d*$/.test(value)) {
+                  setAmount(value);
+                }
               }}
               disabled={loading}
             />
@@ -97,16 +120,16 @@ const NewCampaignForm = () => {
           <small className='text-error mt-1.5'>{inputError}</small>
         </label>
         <button
-          disabled={!(minumumAmount && !inputError) || loading}
+          disabled={!(amount && !inputError) || loading}
           className='btn btn-primary disabled:bg-primary disabled:text-primary-content disabled:opacity-35 mt-4'
           type='submit'
         >
           {loading && <span className='loading loading-dots'></span>}
-          Create Campaign
+          Contribute!
         </button>
       </form>
     </div>
   );
 };
 
-export default NewCampaignForm;
+export default ContributeForm;
