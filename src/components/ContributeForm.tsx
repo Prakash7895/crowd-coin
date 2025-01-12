@@ -6,13 +6,13 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { Contract } from 'web3';
 import { ContextToast } from './ToastContext';
 import { fetchAccounts } from '../../campaign';
+import { CampaignContract } from '../../types';
 
 interface IContributeForm {
   minimumAmount: number;
-  campaignRef: RefObject<Contract<any> | null>;
+  campaignRef: RefObject<CampaignContract | null>;
   onSuccess: () => void;
 }
 
@@ -38,7 +38,7 @@ const ContributeForm: FC<IContributeForm> = ({
     } else {
       setInputError('Only numbers are allowed.');
     }
-  }, [amount]);
+  }, [amount, minimumAmount]);
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ const ContributeForm: FC<IContributeForm> = ({
           title: 'Success',
           message: 'Contributed to Campaign successfully!',
         });
-      } catch (err: any) {
+      } catch (err) {
         console.log('err', err);
         setLoading(false);
         setInputError('');
@@ -77,7 +77,8 @@ const ContributeForm: FC<IContributeForm> = ({
           show: true,
           type: 'error',
           title: 'Error',
-          message: err?.message,
+          message:
+            err instanceof Error ? err.message : 'An unknown error occurred',
         });
       }
     }

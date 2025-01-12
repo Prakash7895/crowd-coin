@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import factory from '../../factory';
-import web3 from '../../web3';
 import { ContextToast } from './ToastContext';
 import { fetchAccounts } from '../../campaign';
 
@@ -52,7 +51,7 @@ const NewCampaignForm = () => {
           message: 'Campaign Created successfully!',
         });
         router.push('/');
-      } catch (err: any) {
+      } catch (err) {
         console.log('err', err);
         setLoading(false);
         setInputError('');
@@ -60,7 +59,8 @@ const NewCampaignForm = () => {
           show: true,
           type: 'error',
           title: 'Error',
-          message: err?.message,
+          message:
+            err instanceof Error ? err.message : 'An unknown error occurred',
         });
       }
     }

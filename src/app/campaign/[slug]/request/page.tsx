@@ -42,14 +42,15 @@ const Request = () => {
         title: 'Success',
         message: 'Request approved successfully!',
       });
-    } catch (err: any) {
+    } catch (err) {
       console.log('err', err);
       setIsLoading(false);
       setState({
         show: true,
         type: 'error',
         title: 'Error',
-        message: err?.message,
+        message:
+          err instanceof Error ? err.message : 'An unknown error occurred',
       });
     }
   };
@@ -72,14 +73,15 @@ const Request = () => {
         title: 'Success',
         message: 'Request finalized successfully!',
       });
-    } catch (err: any) {
+    } catch (err) {
       console.log('err', err);
       setIsLoading(false);
       setState({
         show: true,
         type: 'error',
         title: 'Error',
-        message: err?.message,
+        message:
+          err instanceof Error ? err.message : 'An unknown error occurred',
       });
     }
   };

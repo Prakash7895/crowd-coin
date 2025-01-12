@@ -21,22 +21,24 @@ const useRequests = (address: string, refetchCount: number = 0) => {
       const reqCount = web3.utils.toNumber(requestCount) as number;
       setTotalRequests(reqCount);
 
-      const requests = await Promise.all(
+      const requests = (await Promise.all(
         Array(reqCount)
           .fill(0)
           .map((_, idx) => {
             return campaign.methods.requests(idx).call();
           })
-      );
+      )) as unknown as Array<Record<string, string | boolean>>;
 
       setLoading(false);
       setRequests(
-        requests.map((p: any) => ({
-          approvalCount: web3.utils.toNumber(p.approvalCount) as number,
-          complete: p.complete,
-          description: p.description,
-          recipient: p.recipient,
-          value: +web3.utils.toWei(p.value, 'wei'),
+        requests.map((p) => ({
+          approvalCount: web3.utils.toNumber(
+            p.approvalCount as string
+          ) as number,
+          complete: p.complete as boolean,
+          description: p.description as string,
+          recipient: p.recipient as string,
+          value: +web3.utils.toWei(p.value as string, 'wei'),
         }))
       );
     };

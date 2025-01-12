@@ -6,7 +6,6 @@ import React, {
 } from 'react';
 import { ContextToast } from './ToastContext';
 import useCampaign from '@/hooks/useCampaign';
-import web3 from '../../web3';
 import { usePathname } from 'next/navigation';
 import Title from './Title';
 import { fetchAccounts } from '../../campaign';
@@ -91,7 +90,7 @@ const RequestForm = () => {
         title: 'Success',
         message: 'New request created successfully!',
       });
-    } catch (err: any) {
+    } catch (err) {
       console.log('err', err);
       setLoading(false);
       setInputError({
@@ -103,7 +102,8 @@ const RequestForm = () => {
         show: true,
         type: 'error',
         title: 'Error',
-        message: err?.message,
+        message:
+          err instanceof Error ? err.message : 'An unknown error occurred',
       });
     }
   };

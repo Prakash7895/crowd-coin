@@ -8,7 +8,7 @@ import { useParams, usePathname } from 'next/navigation';
 import Title from '@/components/Title';
 import { useState } from 'react';
 
-const page = () => {
+const Page = () => {
   const param = useParams();
   const pathName = usePathname();
 
@@ -75,7 +75,7 @@ const page = () => {
         {!isLoading && campaignRef.current && (
           <div className='order-1 lg:order-2'>
             <ContributeForm
-              minimumAmount={+campaignInfo?.minimumContribution!}
+              minimumAmount={+(campaignInfo!.minimumContribution! || 0)}
               campaignRef={campaignRef}
               onSuccess={() => setRefetchCount((p) => p + 1)}
             />
@@ -108,4 +108,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
